@@ -178,9 +178,13 @@ trait Context: Debug + Send + Sized + Sync {
     type SwapChainOutputDetail: Send;
 
     type RequestAdapterFuture: Future<Output = Option<Self::AdapterId>> + Send;
-    type RequestDeviceFuture: Future<Output = Result<(Self::DeviceId, Self::QueueId), RequestDeviceError>>
-        + Send;
+    type RequestDeviceFuture: Future<
+        Output = Result<(Self::DeviceId, Self::QueueId), RequestDeviceError>,
+    > + Send;
     type MapAsyncFuture: Future<Output = Result<(), BufferAsyncError>> + Send;
+
+    fn start_capture(&self, device: &Self::DeviceId);
+    fn stop_capture(&self, device: &Self::DeviceId);
 
     fn init(backends: BackendBit) -> Self;
     fn instance_create_surface(
@@ -1492,6 +1496,15 @@ impl Adapter {
 }
 
 impl Device {
+    ///
+    pub fn start_capture(&self) {
+        Context::start_capture(&*self.context, &self.id)
+    }
+
+    pub fn stop_capture(&self) {
+        Context::stop_capture(&*self.context, &self.id)
+    }
+
     /// Check for resource cleanups and mapping callbacks.
     ///
     /// no-op on the web, device is automatically polled.

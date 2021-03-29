@@ -608,6 +608,8 @@ pub(crate) struct CommandEncoder {
     open: bool,
 }
 
+impl Context {}
+
 impl crate::Context for Context {
     type AdapterId = wgc::id::AdapterId;
     type DeviceId = Device;
@@ -639,6 +641,23 @@ impl crate::Context for Context {
     type RequestDeviceFuture =
         Ready<Result<(Self::DeviceId, Self::QueueId), crate::RequestDeviceError>>;
     type MapAsyncFuture = native_gpu_future::GpuFuture<Result<(), crate::BufferAsyncError>>;
+
+    fn start_capture(&self, device: &Self::DeviceId) {
+        // self.0.start_capture(device_id);
+        // wgc::gfx_select!(device.id => global.start_capture(device.id));
+        let global = &self.0;
+        // match wgc::gfx_select!(device.id => global.start_capture(device.id)) {
+        //     // Ok(limits) => limits,
+        //     // Err(err) => self.handle_error_fatal(err, "Device::limits"),
+        // }
+        wgc::gfx_select!(device.id => global.start_capture(device.id));
+    }
+
+    fn stop_capture(&self, device: &Self::DeviceId) {
+        // self.0.stop_capture(device_id);
+        let global = &self.0;
+        wgc::gfx_select!(device.id => global.stop_capture(device.id));
+    }
 
     fn init(backends: wgt::BackendBit) -> Self {
         Self(wgc::hub::Global::new(
